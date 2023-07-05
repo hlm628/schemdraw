@@ -134,6 +134,10 @@ from .transistors import (
     PMos2,
     Hemt
 )
+from .tubes import (
+    Triode, 
+    Half12AX7
+)
 from .misc import (
     Speaker,
     Mic,
@@ -358,6 +362,8 @@ __all__ = [
 "PMos",
 "NMos2",
 "PMos2",
+"Triode", 
+"Half12AX7",
 "Hemt",
 "Speaker",
 "Mic",
