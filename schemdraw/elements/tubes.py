@@ -38,11 +38,14 @@ class Triode(Element):
     ):
         super().__init__(*d, **kwargs)
 
+        self.pin_nums = pin_nums
+        self.half = half
+
         # Decide whether to draw a full circle, left half, or right half based on 'half' argument
         theta1, theta2 = (0, 360)  # Default to full circle
-        if half == "left":
+        if self.half == "left":
             theta1, theta2 = (90 - half_overhang, 270 + half_overhang)
-        elif half == "right":
+        elif self.half == "right":
             theta1, theta2 = (270 - half_overhang, 90 + half_overhang)
 
         # Draw the triode as a circular or semicircular shape using SegmentArc
@@ -112,15 +115,17 @@ class Triode(Element):
         self.params["drop"] = (tr_d, 0)
 
         # Add pin numbers if provided
-        if pin_nums is not None:
+        if self.pin_nums is not None:
             self.segments.append(
-                SegmentText(((tr_d + grid_len) / 2 + 0.2, tr_r), str(pin_nums["g"]))
+                SegmentText(
+                    ((tr_d + grid_len) / 2 + 0.2, tr_r), str(self.pin_nums["g"])
+                )
             )
             self.segments.append(
-                SegmentText((tr_r + 0.2, tr_r + anode_h + 0.3), str(pin_nums["a"]))
+                SegmentText((tr_r + 0.2, tr_r + anode_h + 0.3), str(self.pin_nums["a"]))
             )
             self.segments.append(
-                SegmentText((tr_r, tr_r - cathode_h - 0.3), str(pin_nums["k"]))
+                SegmentText((tr_r, tr_r - cathode_h - 0.3), str(self.pin_nums["k"]))
             )
 
 
