@@ -41,6 +41,8 @@ class Triode(Element):
         self.pin_nums = pin_nums
         self.half = half
 
+        half_sign = 1 if self.half == "right" else -1
+
         # Decide whether to draw a full circle, left half, or right half based on 'half' argument
         theta1, theta2 = (0, 360)  # Default to full circle
         if self.half == "left":
@@ -69,7 +71,14 @@ class Triode(Element):
                 ls="--",
             )
         )
-        self.segments.append(Segment([(0, tr_r), ((tr_d - grid_len) / 2 - 0.1, tr_r)]))
+        self.segments.append(
+            Segment(
+                [
+                    (tr_r + half_sign * tr_r, tr_r),
+                    ((tr_d + half_sign * grid_len) / 2 + half_sign * 0.1, tr_r),
+                ]
+            )
+        )
 
         # Anode leads
         self.segments.append(
@@ -94,23 +103,23 @@ class Triode(Element):
         self.segments.append(
             Segment(
                 [
-                    (tr_r + cathode_len / 2, tr_r - cathode_h),
-                    (tr_r + cathode_len / 2, tr_r - cathode_h - cathode_tail),
+                    (tr_r - half_sign * cathode_len / 2, tr_r - cathode_h),
+                    (tr_r - half_sign * cathode_len / 2, tr_r - cathode_h - cathode_tail),
                 ]
             )
         )
         self.segments.append(
             Segment(
                 [
-                    (tr_r - cathode_len / 2, tr_r - cathode_h),
-                    (tr_r - cathode_len / 2, tr_r - cathode_gap),
+                    (tr_r + half_sign * cathode_len / 2, tr_r - cathode_h),
+                    (tr_r + half_sign * cathode_len / 2, tr_r - cathode_gap),
                 ]
             )
         )
 
         # Defining the anchor points
-        self.anchors["g"] = (0, tr_r)  # Grid
-        self.anchors["k"] = (tr_r - cathode_len / 2, tr_r - cathode_gap)  # Cathode
+        self.anchors["g"] = (tr_r + half_sign * tr_r, tr_r)  # Grid
+        self.anchors["k"] = (tr_r + half_sign * cathode_len / 2, tr_r - cathode_gap)  # Cathode
         self.anchors["a"] = (tr_r, tr_d)  # Anode
         self.params["drop"] = (tr_d, 0)
 
@@ -118,11 +127,11 @@ class Triode(Element):
         if self.pin_nums is not None:
             self.segments.append(
                 SegmentText(
-                    ((tr_d + grid_len) / 2 + 0.2, tr_r), str(self.pin_nums["g"])
+                    ((tr_d - half_sign * grid_len) / 2 - half_sign * 0.2, tr_r), str(self.pin_nums["g"])
                 )
             )
             self.segments.append(
-                SegmentText((tr_r + 0.2, tr_r + anode_h + 0.3), str(self.pin_nums["a"]))
+                SegmentText((tr_r - half_sign * 0.2, tr_r + anode_h + 0.3), str(self.pin_nums["a"]))
             )
             self.segments.append(
                 SegmentText((tr_r, tr_r - cathode_h - 0.3), str(self.pin_nums["k"]))
