@@ -19,6 +19,8 @@ cathode_tail = 1 / 2 * (cathode_gap - cathode_h)
 
 half_overhang = 12.5
 
+dual_tr_gap = 0.5 * tr_r
+dual_tr_grid_offset = 0.25
 
 class Triode(Element):
     """Triode Vacuum Tube.
@@ -33,9 +35,7 @@ class Triode(Element):
         * a (anode)
     """
 
-    def __init__(
-        self, *d, leads: bool = False, pin_nums: dict = None, half: str = None, **kwargs
-    ):
+    def __init__(self, *d, pin_nums: dict = None, half: str = None, **kwargs):
         super().__init__(*d, **kwargs)
 
         self.pin_nums = pin_nums
@@ -148,10 +148,203 @@ class Triode(Element):
             )
 
 
-def Half12AX7(half="left"):
+class DualTriode(Element):
+    """Dual Triode Vacuum Tube.
+
+    Args:
+        pin_nums: Show pin numbers at each anchor
+
+    Anchors:
+        * g1 (grid of first triode)
+        * g2 (grid of second triode)
+        * k1 (cathode of first triode)
+        * k2 (cathode of second triode)
+        * a1 (anode of first triode)
+        * a2 (anode of second triode)
+    """
+
+    def __init__(self, *d, pin_nums: dict = None, **kwargs):
+        super().__init__(*d, **kwargs)
+
+        self.pin_nums = pin_nums
+
+        # Draw the triode outline
+        self.segments.append(
+            SegmentArc(
+                center=(tr_r, tr_r),
+                width=tr_d,
+                height=tr_d,
+                theta1=90,
+                theta2=270,
+            )
+        )
+
+        self.segments.append(Segment([(tr_r, 0), (tr_r + dual_tr_gap, 0)]))
+
+        self.segments.append(Segment([(tr_r, tr_d), (tr_r + dual_tr_gap, tr_d)]))
+
+        self.segments.append(
+            SegmentArc(
+                center=(tr_r + dual_tr_gap, tr_r),
+                width=tr_d,
+                height=tr_d,
+                theta1=270,
+                theta2=90,
+            )
+        )
+
+        # Grid lead as dotted lines
+        self.segments.append(
+            Segment(
+                [
+                    (dual_tr_grid_offset + (tr_d - grid_len) / 2, tr_r),
+                    (dual_tr_grid_offset + (tr_d - grid_len) / 2 + 0.5 * grid_len, tr_r),
+                ],
+                ls="--",
+            )
+        )
+        
+        self.segments.append(
+            Segment(
+                [
+                    ((tr_d + dual_tr_gap) - (dual_tr_grid_offset + (tr_d - grid_len) / 2), tr_r),
+                    ((tr_d + dual_tr_gap) - (dual_tr_grid_offset + (tr_d - grid_len) / 2 + 0.5 * grid_len), tr_r),
+                ],
+                ls="--",
+            )
+        )
+
+        self.segments.append(
+            Segment(
+                [
+                    (tr_d + dual_tr_gap - (grid_len / 2) + 0.1 - dual_tr_grid_offset, tr_r),
+                    (tr_d + dual_tr_gap, tr_r),
+                ]
+            )
+        )
+
+        self.segments.append(
+            Segment(
+                [
+                    (0, tr_r),
+                    ((tr_d - grid_len) / 2 - 0.1 + dual_tr_grid_offset, tr_r),
+                ]
+            )
+        )
+
+        # Anode leads
+        self.segments.append(
+            Segment(
+                [
+                    (tr_r - anode_len / 2, tr_r + anode_h),
+                    (tr_r + anode_len / 2 + dual_tr_gap, tr_r + anode_h),
+                ]
+            )
+        )
+        self.segments.append(Segment([(tr_r, tr_r + anode_h), (tr_r, tr_d)]))
+        self.segments.append(
+            Segment([(tr_r + dual_tr_gap, tr_r + anode_h), (tr_r + dual_tr_gap, tr_d)])
+        )
+
+        # Cathode leads
+        self.segments.append(
+            Segment(
+                [
+                    (tr_r - cathode_len / 2, tr_r - cathode_h),
+                    (tr_r + cathode_len / 2 + dual_tr_gap, tr_r - cathode_h),
+                ]
+            )
+        )
+        self.segments.append(
+            Segment(
+                [
+                    (tr_r - cathode_len / 2, tr_r - cathode_h),
+                    (tr_r - cathode_len / 2, tr_r - cathode_gap),
+                ]
+            )
+        )
+        self.segments.append(
+            Segment(
+                [
+                    (tr_r + cathode_len / 2 + dual_tr_gap, tr_r - cathode_h),
+                    (tr_r + cathode_len / 2 + dual_tr_gap, tr_r - cathode_gap),
+                ]
+            )
+        )
+
+        ## Defining the anchor points
+        # Grids
+        self.anchors["g1"] = (0, tr_r)  # Grids
+        self.anchors["g2"] = (tr_d + dual_tr_gap, tr_r)
+
+        # Cathodes
+        self.anchors["k1"] = (
+            tr_r - cathode_len / 2,
+            tr_r - cathode_gap,
+        )
+        self.anchors["k2"] = (
+            tr_r + cathode_len / 2 + dual_tr_gap,
+            tr_r - cathode_gap,
+        )
+
+        # Anodes
+        self.anchors["a1"] = (tr_r - anode_len / 2, tr_d)
+        self.anchors["a2"] = (tr_r + anode_len / 2 + dual_tr_gap, tr_d)
+
+        self.params["drop"] = (tr_d + dual_tr_gap, 0)
+
+        # Add pin numbers if provided
+        if self.pin_nums is not None:
+            # Grids
+            self.segments.append(
+                SegmentText(
+                    (0.3, tr_r + 0.2),
+                    str(self.pin_nums["g1"]),
+                )
+            )
+            self.segments.append(
+                SegmentText(
+                    (tr_d + dual_tr_gap - 0.3, tr_r + 0.2),
+                    str(self.pin_nums["g2"]),
+                )
+            )
+
+            # Anodes
+            self.segments.append(
+                SegmentText(
+                    (tr_r - 0.2, tr_r + anode_h + 0.3),
+                    str(self.pin_nums["a1"]),
+                )
+            )
+            self.segments.append(
+                SegmentText(
+                    (tr_r + dual_tr_gap + 0.2, tr_r + anode_h + 0.3),
+                    str(self.pin_nums["a2"]),
+                )
+            )
+
+            # Cathodes
+            self.segments.append(
+                SegmentText(
+                    (tr_r - cathode_gap / 2 + 0.3, tr_r - cathode_h - 0.3),
+                    str(self.pin_nums["k1"]),
+                )
+            )
+            self.segments.append(
+                SegmentText(
+                    (
+                        tr_r + cathode_gap / 2 + dual_tr_gap - 0.3,
+                        tr_r - cathode_h - 0.3,
+                    ),
+                    str(self.pin_nums["k2"]),
+                )
+            )
+
+
+def Half12AX7(half="left", **kwargs):
     """Half of a 12AX7 Triode.
 
-    Uses the triode class above, but shows correct pin numbers. Can specify left or right.
+    Uses the Triode class above, but shows correct pin numbers. Can specify left or right.
 
     Args:
         half: "left" or "right" half of the tube
@@ -164,4 +357,19 @@ def Half12AX7(half="left"):
     elif half == "right":
         pin_nums = {"g": 7, "k": 8, "a": 6}
 
-    return Triode(half=half, pin_nums=pin_nums)
+    return Triode(half=half, pin_nums=pin_nums, **kwargs)
+
+
+def _12AX7(**kwargs):
+    """Full 12AX7 Triode.
+
+    Uses the DualTriode class above, but shows correct pin numbers.
+    """
+
+    return DualTriode(
+        pin_nums={"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6}, **kwargs
+    )
+
+
+ECC83 = _12AX7
+HalfECC83 = Half12AX7
