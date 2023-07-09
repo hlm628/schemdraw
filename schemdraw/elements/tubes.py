@@ -22,6 +22,9 @@ half_overhang = 12.5
 dual_tr_gap = 0.5 * tr_r
 dual_tr_grid_offset = 0.25
 
+pent_gap = dual_tr_gap
+
+
 class Triode(Element):
     """Triode Vacuum Tube.
 
@@ -198,17 +201,10 @@ class DualTriode(Element):
             Segment(
                 [
                     (dual_tr_grid_offset + (tr_d - grid_len) / 2, tr_r),
-                    (dual_tr_grid_offset + (tr_d - grid_len) / 2 + 0.5 * grid_len, tr_r),
-                ],
-                ls="--",
-            )
-        )
-        
-        self.segments.append(
-            Segment(
-                [
-                    ((tr_d + dual_tr_gap) - (dual_tr_grid_offset + (tr_d - grid_len) / 2), tr_r),
-                    ((tr_d + dual_tr_gap) - (dual_tr_grid_offset + (tr_d - grid_len) / 2 + 0.5 * grid_len), tr_r),
+                    (
+                        dual_tr_grid_offset + (tr_d - grid_len) / 2 + 0.5 * grid_len,
+                        tr_r,
+                    ),
                 ],
                 ls="--",
             )
@@ -217,7 +213,30 @@ class DualTriode(Element):
         self.segments.append(
             Segment(
                 [
-                    (tr_d + dual_tr_gap - (grid_len / 2) + 0.1 - dual_tr_grid_offset, tr_r),
+                    (
+                        (tr_d + dual_tr_gap)
+                        - (dual_tr_grid_offset + (tr_d - grid_len) / 2),
+                        tr_r,
+                    ),
+                    (
+                        (tr_d + dual_tr_gap)
+                        - (
+                            dual_tr_grid_offset + (tr_d - grid_len) / 2 + 0.5 * grid_len
+                        ),
+                        tr_r,
+                    ),
+                ],
+                ls="--",
+            )
+        )
+
+        self.segments.append(
+            Segment(
+                [
+                    (
+                        tr_d + dual_tr_gap - (grid_len / 2) + 0.1 - dual_tr_grid_offset,
+                        tr_r,
+                    ),
                     (tr_d + dual_tr_gap, tr_r),
                 ]
             )
@@ -373,3 +392,222 @@ def _12AX7(**kwargs):
 
 ECC83 = _12AX7
 HalfECC83 = Half12AX7
+
+
+class Pentode(Element):
+    """Pentode Vacuum Tube.
+
+    Args:
+        pin_nums: Show pin numbers at each anchor
+
+    Anchors:
+        * g1 (grid)
+        * g2 (screen grid)
+        * g3 (suppressor grid)
+        * k (cathode)
+        * a (anode)
+    """
+
+    def __init__(self, *d, pin_nums: dict = None, **kwargs):
+        super().__init__(*d, **kwargs)
+
+        self.pin_nums = pin_nums
+
+        # Draw the pentode outline
+        self.segments.append(
+            SegmentArc(
+                center=(tr_r, tr_r),
+                width=tr_d,
+                height=tr_d,
+                theta1=180,
+                theta2=0,
+            )
+        )
+
+        self.segments.append(
+            Segment(
+                [
+                    (0, tr_r),
+                    (0, tr_r + pent_gap),
+                ]
+            )
+        )
+
+        self.segments.append(
+            Segment(
+                [
+                    (tr_d, tr_r),
+                    (tr_d, tr_r + pent_gap),
+                ]
+            )
+        )
+
+        self.segments.append(
+            SegmentArc(
+                center=(tr_r, tr_r + pent_gap),
+                width=tr_d,
+                height=tr_d,
+                theta1=0,
+                theta2=180,
+            )
+        )
+
+        # Grid lead as a dotted line
+        self.segments.append(
+            Segment(
+                [
+                    ((tr_d - grid_len) / 2, tr_r),
+                    ((tr_d + grid_len) / 2, tr_r),
+                ],
+                ls="--",
+            )
+        )
+        self.segments.append(
+            Segment(
+                [
+                    (tr_d, tr_r),
+                    ((tr_d + grid_len) / 2 + 0.1, tr_r),
+                ]
+            )
+        )
+
+        # Screen grid as a dotted line
+        self.segments.append(
+            Segment(
+                [
+                    ((tr_d - grid_len) / 2, tr_r + pent_gap / 2),
+                    ((tr_d + grid_len) / 2, tr_r + pent_gap / 2),
+                ],
+                ls="--",
+            )
+        )
+        self.segments.append(
+            Segment(
+                [
+                    (0, tr_r + pent_gap / 2),
+                    (grid_len / 2 - 0.1, tr_r + pent_gap / 2),
+                ]
+            )
+        )
+
+        # Suppressor grid as a dotted line
+        self.segments.append(
+            Segment(
+                [
+                    ((tr_d - grid_len) / 2, tr_r + pent_gap),
+                    ((tr_d + grid_len) / 2, tr_r + pent_gap),
+                ],
+                ls="--",
+            )
+        )
+        self.segments.append(
+            Segment(
+                [
+                    (tr_d, tr_r + pent_gap),
+                    ((tr_d + grid_len) / 2 + 0.1, tr_r + pent_gap),
+                ]
+            )
+        )
+
+        # Anode leads
+        self.segments.append(
+            Segment(
+                [
+                    (tr_r - anode_len / 2, tr_r + pent_gap + anode_h),
+                    (tr_r + anode_len / 2, tr_r + pent_gap + anode_h),
+                ]
+            )
+        )
+        self.segments.append(
+            Segment([(tr_r, tr_r + pent_gap + anode_h), (tr_r, tr_d + pent_gap)])
+        )
+
+        # Cathode leads
+        self.segments.append(
+            Segment(
+                [
+                    (tr_r - cathode_len / 2, tr_r - cathode_h),
+                    (tr_r + cathode_len / 2, tr_r - cathode_h),
+                ]
+            )
+        )
+        self.segments.append(
+            Segment(
+                [
+                    (tr_r + cathode_len / 2, tr_r - cathode_h),
+                    (
+                        tr_r + cathode_len / 2,
+                        tr_r - cathode_h - cathode_tail,
+                    ),
+                ]
+            )
+        )
+        self.segments.append(
+            Segment(
+                [
+                    (tr_r - cathode_len / 2, tr_r - cathode_h),
+                    (tr_r - cathode_len / 2, tr_r - cathode_gap),
+                ]
+            )
+        )
+
+        # Defining the anchor points
+        self.anchors["g1"] = (tr_d, tr_r)  # Grid
+        self.anchors["g2"] = (0, tr_r + pent_gap / 2)  # Screen
+        self.anchors["g3"] = (tr_d, tr_r + pent_gap)  # Suppressor
+        self.anchors["k"] = (
+            tr_r - cathode_len / 2,
+            tr_r - cathode_gap,
+        )  # Cathode
+        self.anchors["a"] = (tr_r, tr_d + pent_gap)  # Anode
+        self.params["drop"] = (tr_d, 0)
+
+        # Add pin numbers if provided
+        if self.pin_nums is not None:
+            self.segments.append(
+                SegmentText(
+                    (tr_r - grid_len / 2 - 0.2, tr_r),
+                    str(self.pin_nums["g1"]),
+                )
+            )
+            self.segments.append(
+                SegmentText(
+                    (tr_d - grid_len / 2 + 0.2, tr_r + pent_gap / 2),
+                    str(self.pin_nums["g2"]),
+                )
+            )
+
+            self.segments.append(
+                SegmentText(
+                    (tr_r - grid_len / 2 - 0.2, tr_r + pent_gap),
+                    str(self.pin_nums["g3"]),
+                )
+            )
+
+            self.segments.append(
+                SegmentText(
+                    (tr_r + 0.2, tr_r + pent_gap + anode_h + 0.2),
+                    str(self.pin_nums["a"]),
+                )
+            )
+            self.segments.append(
+                SegmentText((tr_r, tr_r - cathode_h - 0.3), str(self.pin_nums["k"]))
+            )
+
+
+def KT66(**kwargs):
+    """KT66 Pentode.
+
+    Uses the Pentode class above, but shows correct pin numbers.
+    """
+
+    return Pentode(pin_nums={"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8}, **kwargs)
+
+
+def EL34(**kwargs):
+    """EL34 Pentode.
+
+    Uses the Pentode class above, but shows correct pin numbers.
+    """
+
+    return Pentode(pin_nums={"g1": 5, "g2": 4, "g3": 1, "a": 3, "k": 8}, **kwargs)
