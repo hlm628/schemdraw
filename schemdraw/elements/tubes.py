@@ -25,7 +25,38 @@ dual_tr_grid_offset = 0.25
 pent_gap = dual_tr_gap
 
 
-class Triode(Element):
+class VacuumTube(Element):
+    """
+    Parent class for all the tubes defined below.
+
+    Args:
+        pin_nums: Show pin numbers at each anchor
+        draw_heaters: Whether to draw heater filaments
+    """
+
+    def __init__(self, *d, pin_nums: dict = None, draw_heaters: bool = False, **kwargs):
+        super().__init__(*d, **kwargs)
+
+        self.pin_nums = pin_nums
+        self.draw_heaters = draw_heaters
+
+    def draw_heaters(self):
+        """Draw heater filaments"""
+        x_extent, _ = self.anchors["drop"]
+
+        self.segments.append(Segment([(x_extent / 2 - 0.2, 0), (x_extent, 0.2)]))
+
+        self.segments.append(Segment([(x_extent / 2 + 0.2, 0), (x_extent, 0.2)]))
+
+    def draw_pin_num(self, location, num):
+        self.segments.append(
+            SegmentText(
+                location, str(num)
+            )
+        )
+
+
+class Triode(VacuumTube):
     """Triode Vacuum Tube.
 
     Args:
@@ -151,7 +182,7 @@ class Triode(Element):
             )
 
 
-class DualTriode(Element):
+class DualTriode(VacuumTube):
     """Dual Triode Vacuum Tube.
 
     Args:
@@ -394,7 +425,7 @@ ECC83 = _12AX7
 HalfECC83 = Half12AX7
 
 
-class Pentode(Element):
+class Pentode(VacuumTube):
     """Pentode Vacuum Tube.
 
     Args:
