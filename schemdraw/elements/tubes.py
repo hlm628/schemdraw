@@ -49,11 +49,7 @@ class VacuumTube(Element):
         self.segments.append(Segment([(x_extent / 2 + 0.2, 0), (x_extent, 0.2)]))
 
     def draw_pin_num(self, location, num):
-        self.segments.append(
-            SegmentText(
-                location, str(num)
-            )
-        )
+        self.segments.append(SegmentText(location, str(num)))
 
 
 class Triode(VacuumTube):
@@ -69,10 +65,9 @@ class Triode(VacuumTube):
         * a (anode)
     """
 
-    def __init__(self, *d, pin_nums: dict = None, half: str = None, **kwargs):
+    def __init__(self, *d, half: str = None, **kwargs):
         super().__init__(*d, **kwargs)
 
-        self.pin_nums = pin_nums
         self.half = half
 
         half_sign = 1 if self.half == "right" else -1
@@ -165,21 +160,18 @@ class Triode(VacuumTube):
 
         # Add pin numbers if provided
         if self.pin_nums is not None:
-            self.segments.append(
-                SegmentText(
-                    ((tr_d - half_sign * grid_len) / 2 - half_sign * 0.2, tr_r),
-                    str(self.pin_nums["g"]),
-                )
+            self.draw_pin_num(
+                ((tr_d - half_sign * grid_len) / 2 - half_sign * 0.2, tr_r),
+                self.pin_nums["g"],
             )
-            self.segments.append(
-                SegmentText(
-                    (tr_r - half_sign * 0.2, tr_r + anode_h + 0.3),
-                    str(self.pin_nums["a"]),
-                )
+            self.draw_pin_num(
+                (tr_r - half_sign * 0.2, tr_r + anode_h + 0.3),
+                self.pin_nums["a"],
             )
-            self.segments.append(
-                SegmentText((tr_r, tr_r - cathode_h - 0.3), str(self.pin_nums["k"]))
-            )
+            self.draw_pin_num((tr_r, tr_r - cathode_h - 0.3), self.pin_nums["k"])
+
+        if self.draw_heaters:
+            self.draw_heaters()
 
 
 class DualTriode(VacuumTube):
@@ -197,10 +189,8 @@ class DualTriode(VacuumTube):
         * a2 (anode of second triode)
     """
 
-    def __init__(self, *d, pin_nums: dict = None, **kwargs):
+    def __init__(self, *d, **kwargs):
         super().__init__(*d, **kwargs)
-
-        self.pin_nums = pin_nums
 
         # Draw the triode outline
         self.segments.append(
@@ -346,17 +336,13 @@ class DualTriode(VacuumTube):
         # Add pin numbers if provided
         if self.pin_nums is not None:
             # Grids
-            self.segments.append(
-                SegmentText(
-                    (0.3, tr_r + 0.2),
-                    str(self.pin_nums["g1"]),
-                )
+            self.draw_pin_num(
+                (0.3, tr_r + 0.2),
+                self.pin_nums["g1"],
             )
-            self.segments.append(
-                SegmentText(
-                    (tr_d + dual_tr_gap - 0.3, tr_r + 0.2),
-                    str(self.pin_nums["g2"]),
-                )
+            self.draw_pin_num(
+                (tr_d + dual_tr_gap - 0.3, tr_r + 0.2),
+                self.pin_nums["g2"],
             )
 
             # Anodes
@@ -366,29 +352,26 @@ class DualTriode(VacuumTube):
                     str(self.pin_nums["a1"]),
                 )
             )
-            self.segments.append(
-                SegmentText(
-                    (tr_r + dual_tr_gap + 0.2, tr_r + anode_h + 0.3),
-                    str(self.pin_nums["a2"]),
-                )
+            self.draw_pin_num(
+                (tr_r + dual_tr_gap + 0.2, tr_r + anode_h + 0.3),
+                self.pin_nums["a2"],
             )
 
             # Cathodes
-            self.segments.append(
-                SegmentText(
-                    (tr_r - cathode_gap / 2 + 0.3, tr_r - cathode_h - 0.3),
-                    str(self.pin_nums["k1"]),
-                )
+            self.draw_pin_num(
+                (tr_r - cathode_gap / 2 + 0.3, tr_r - cathode_h - 0.3),
+                self.pin_nums["k1"],
             )
-            self.segments.append(
-                SegmentText(
-                    (
-                        tr_r + cathode_gap / 2 + dual_tr_gap - 0.3,
-                        tr_r - cathode_h - 0.3,
-                    ),
-                    str(self.pin_nums["k2"]),
-                )
+            self.draw_pin_num(
+                (
+                    tr_r + cathode_gap / 2 + dual_tr_gap - 0.3,
+                    tr_r - cathode_h - 0.3,
+                ),
+                self.pin_nums["k2"],
             )
+
+            if self.draw_heaters:
+                self.draw_heaters()
 
 
 def Half12AX7(half="left", **kwargs):
@@ -439,10 +422,8 @@ class Pentode(VacuumTube):
         * a (anode)
     """
 
-    def __init__(self, *d, pin_nums: dict = None, **kwargs):
+    def __init__(self, *d, **kwargs):
         super().__init__(*d, **kwargs)
-
-        self.pin_nums = pin_nums
 
         # Draw the pentode outline
         self.segments.append(
@@ -595,35 +576,29 @@ class Pentode(VacuumTube):
 
         # Add pin numbers if provided
         if self.pin_nums is not None:
-            self.segments.append(
-                SegmentText(
-                    (tr_r - grid_len / 2 - 0.2, tr_r),
-                    str(self.pin_nums["g1"]),
-                )
-            )
-            self.segments.append(
-                SegmentText(
-                    (tr_d - grid_len / 2 + 0.2, tr_r + pent_gap / 2),
-                    str(self.pin_nums["g2"]),
-                )
+            self.draw_pin_num(
+                (tr_r - grid_len / 2 - 0.2, tr_r),
+                self.pin_nums["g1"],
             )
 
-            self.segments.append(
-                SegmentText(
-                    (tr_r - grid_len / 2 - 0.2, tr_r + pent_gap),
-                    str(self.pin_nums["g3"]),
-                )
+            self.draw_pin_num(
+                (tr_d - grid_len / 2 + 0.2, tr_r + pent_gap / 2),
+                self.pin_nums["g2"],
             )
 
-            self.segments.append(
-                SegmentText(
-                    (tr_r + 0.2, tr_r + pent_gap + anode_h + 0.2),
-                    str(self.pin_nums["a"]),
-                )
+            self.draw_pin_num(
+                (tr_r - grid_len / 2 - 0.2, tr_r + pent_gap),
+                self.pin_nums["g3"],
             )
-            self.segments.append(
-                SegmentText((tr_r, tr_r - cathode_h - 0.3), str(self.pin_nums["k"]))
+
+            self.draw_pin_num(
+                (tr_r + 0.2, tr_r + pent_gap + anode_h + 0.2),
+                self.pin_nums["a"],
             )
+            self.draw_pin_num((tr_r, tr_r - cathode_h - 0.3), self.pin_nums["k"])
+
+        if self.draw_heaters:
+            self.draw_heaters()
 
 
 def KT66(**kwargs):
