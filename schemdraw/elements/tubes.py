@@ -31,22 +31,22 @@ class VacuumTube(Element):
 
     Args:
         pin_nums: Show pin numbers at each anchor
-        draw_heaters: Whether to draw heater filaments
+        heaters: Whether to draw heater filaments
     """
 
-    def __init__(self, *d, pin_nums: dict = None, draw_heaters: bool = False, **kwargs):
+    def __init__(self, *d, pin_nums: dict = None, heaters: bool = False, **kwargs):
         super().__init__(*d, **kwargs)
 
         self.pin_nums = pin_nums
-        self.draw_heaters = draw_heaters
+        self.heaters = heaters
 
     def draw_heaters(self):
         """Draw heater filaments"""
-        x_extent, _ = self.anchors["drop"]
+        x_extent, _ = self.params["drop"]
 
-        self.segments.append(Segment([(x_extent / 2 - 0.2, 0), (x_extent, 0.2)]))
+        self.segments.append(Segment([(x_extent / 2 - 0.2, -0.2), (x_extent / 2, 0.2)]))
 
-        self.segments.append(Segment([(x_extent / 2 + 0.2, 0), (x_extent, 0.2)]))
+        self.segments.append(Segment([(x_extent / 2 + 0.2, -0.2), (x_extent / 2, 0.2)]))
 
     def draw_pin_num(self, location, num):
         self.segments.append(SegmentText(location, str(num)))
@@ -170,7 +170,7 @@ class Triode(VacuumTube):
             )
             self.draw_pin_num((tr_r, tr_r - cathode_h - 0.3), self.pin_nums["k"])
 
-        if self.draw_heaters:
+        if self.heaters:
             self.draw_heaters()
 
 
@@ -370,7 +370,7 @@ class DualTriode(VacuumTube):
                 self.pin_nums["k2"],
             )
 
-            if self.draw_heaters:
+            if self.heaters:
                 self.draw_heaters()
 
 
@@ -595,9 +595,13 @@ class Pentode(VacuumTube):
                 (tr_r + 0.2, tr_r + pent_gap + anode_h + 0.2),
                 self.pin_nums["a"],
             )
-            self.draw_pin_num((tr_r, tr_r - cathode_h - 0.3), self.pin_nums["k"])
 
-        if self.draw_heaters:
+            x_offset = 0.2 if self.heaters else 0
+            self.draw_pin_num(
+                (tr_r + x_offset, tr_r - cathode_h - 0.3), self.pin_nums["k"]
+            )
+
+        if self.heaters:
             self.draw_heaters()
 
 
