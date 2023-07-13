@@ -406,6 +406,16 @@ def _12AX7(**kwargs):
 
 ECC83 = _12AX7
 HalfECC83 = Half12AX7
+_12AT7 = _12AX7
+_12AU7 = _12AX7
+_12AY7 = _12AX7
+_12AX7A = _12AX7
+_12AX7WA = _12AX7
+ECC81 = _12AX7
+ECC82 = _12AX7
+_7025 = _12AX7
+CV4004 = _12AX7
+ECC803 = _12AX7
 
 
 class Pentode(VacuumTube):
@@ -612,6 +622,8 @@ def KT66(**kwargs):
     """
 
     return Pentode(pin_nums={"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8}, **kwargs)
+
+_6L6GC = KT66
 
 
 def EL34(**kwargs):
