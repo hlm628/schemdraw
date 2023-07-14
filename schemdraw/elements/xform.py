@@ -44,7 +44,10 @@ class Transformer(Element):
         if t2_list is None:
             t2_list = [t2]
         else:
+            if loop:
+                raise ValueError("Cannot have multiple secondary windings with loop")
             t2 = sum(t2_list) + len(t2_list) - 1
+
         rtop = (ltop + lbot) / 2 + t2 * ind_w / 2
         rbot = (ltop + lbot) / 2 - t2 * ind_w / 2
 
@@ -57,24 +60,24 @@ class Transformer(Element):
 
         ltapx = 0.0
         rtapx = ind_gap
-
-        # Draw primary windings
+        # Draw loops/coils
         if loop:
-            ltapx, ltop = self.draw_loops(t1, (0, 0))
+            c1 = cycloid(loops=t1, ofst=(0, 0), norm=False, vertical=True)
+            c2 = cycloid(
+                loops=t2,
+                ofst=(ind_gap, -rtop + ltop),
+                norm=False,
+                flip=True,
+                vertical=True,
+            )
+            ltapx = min([i[0] for i in c1])
+            rtapx = max([i[0] for i in c2])
+            ltop = c1[-1][1]
+            rtop = c2[-1][1]
+            self.segments.append(Segment(c1))
+            self.segments.append(Segment(c2))
         else:
             self.draw_coils(t1, (0, ltop), ind_w)
-
-        # Draw secondary windings
-        rtapx_list = []
-        if loop:
-            for j in range(len(t2_list)):
-                rtapx, rtop = self.draw_loops(
-                    t2_list[j],
-                    (ind_gap, (ltop - lbot) / 2 - (sum(t2_list[:j]) + j) * ind_w / 2),
-                    flip=True,
-                )
-                rtapx_list.append(rtapx)
-        else:
             for j in range(len(t2_list)):
                 self.draw_coils(
                     t2_list[j],
@@ -129,20 +132,6 @@ class Transformer(Element):
                 else:
                     winding, pos = pos
                     self.tap(name, pos, "secondary", winding)
-
-    def draw_loops(self, n, ofst, flip=False):
-        """Draw loops on one side of the transformer
-
-        Args:
-            n: Number of loops
-            ofst: Offset position to center loop
-            flip: Flip the loops (for secondary side)
-        """
-        c = cycloid(loops=n, ofst=ofst, flip=flip, norm=False, vertical=True)
-        tapx = min([i[0] for i in c])
-        top = c[-1][1]
-        self.segments.append(Segment(c))
-        return tapx, top
 
     def draw_coils(self, n, ofst, radius, flip=False):
         """Draw coils on one side of the transformer
