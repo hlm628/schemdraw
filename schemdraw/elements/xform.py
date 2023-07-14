@@ -70,13 +70,18 @@ class Transformer(Element):
             for j in range(len(t2_list)):
                 rtapx, rtop = self.draw_loops(
                     t2_list[j],
-                    (ind_gap, (ltop - lbot) / 2 - (sum(t2[:j]) + j) * ind_w / 2),
+                    (ind_gap, (ltop - lbot) / 2 - (sum(t2_list[:j]) + j) * ind_w / 2),
                     flip=True,
                 )
                 rtapx_list.append(rtapx)
         else:
             for j in range(len(t2_list)):
-                self.draw_coils(t2_list[j], (ind_gap, rtop-((sum(t2[:j])+j) * ind_w + ind_w/2)), ind_w, flip=True)
+                self.draw_coils(
+                    t2_list[j],
+                    (ind_gap, rtop - (sum(t2_list[:j]) + j) * ind_w),
+                    ind_w,
+                    flip=True,
+                )
 
         # Add the core
         if core:
@@ -93,21 +98,37 @@ class Transformer(Element):
 
         self.anchors["p1"] = (0, ltop)
         self.anchors["p2"] = (0, lbot)
-        self.anchors["s1"] = (ind_gap, rtop)
-        self.anchors["s2"] = (ind_gap, rbot)
+        if len(t2_list) == 1:
+            self.anchors["s1"] = (ind_gap, rtop)
+            self.anchors["s2"] = (ind_gap, rbot)
+        else:
+            for j in range(len(t2_list)):
+                self.anchors[f"s1_{j+1}"] = (
+                    ind_gap,
+                    rtop - (sum(t2_list[:j]) + j) * ind_w,
+                )
+                self.anchors[f"s2_{j+1}"] = (
+                    ind_gap,
+                    rtop - (sum(t2_list[: j + 1]) + j) * ind_w,
+                )
 
         self._ltapx = ltapx  # Save these for adding taps
         self._rtapx = rtapx
         self._ltop = ltop
         self._rtop = rtop
         self._ind_w = ind_w
+        self._t2_list = t2_list
 
         if "ltaps" in kwargs:
             for name, pos in kwargs["ltaps"].items():
                 self.tap(name, pos, "primary")
         if "rtaps" in kwargs:
             for name, pos in kwargs["rtaps"].items():
-                self.tap(name, pos, "secondary")
+                if isinstance(pos, int):
+                    self.tap(name, pos, "secondary")
+                else:
+                    winding, pos = pos
+                    self.tap(name, pos, "secondary", winding)
 
     def draw_loops(self, n, ofst, flip=False):
         """Draw loops on one side of the transformer
@@ -133,7 +154,7 @@ class Transformer(Element):
             flip: Flip the coils (for secondary side)
         """
 
-        theta1, theta2 = 90
+        theta1, theta2 = 270, 90
 
         if flip:
             theta2, theta1 = theta1, theta2
@@ -144,14 +165,14 @@ class Transformer(Element):
             self.segments.append(
                 SegmentArc(
                     (x, y - (i * radius + radius / 2)),
-                    theta1=270,
-                    theta2=90,
+                    theta1=theta1,
+                    theta2=theta2,
                     width=radius,
                     height=radius,
                 )
             )
 
-    def tap(self, name: str, pos: int, side: XformTap = "primary"):
+    def tap(self, name: str, pos: int, side: XformTap = "primary", winding: int = 0):
         """Add a tap
 
         A tap is simply a named anchor definition along one side
@@ -165,7 +186,11 @@ class Transformer(Element):
         if side in ["left", "primary"]:
             self.anchors[name] = (self._ltapx, self._ltop - pos * self._ind_w)
         elif side in ["right", "secondary"]:
-            self.anchors[name] = (self._rtapx, self._rtop - pos * self._ind_w)
+            self.anchors[name] = (
+                self._rtapx,
+                self._rtop
+                - ((sum(self._t2_list[:winding]) + winding + pos) * self._ind_w),
+            )
         else:
             raise ValueError(f"Undefined tap side {side}")
         return self
