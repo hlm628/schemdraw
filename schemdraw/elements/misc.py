@@ -187,12 +187,14 @@ class AudioJack(Element):
             self.anchors["ring"] = (0, ringy)
 
         else:
-            if dots:
+            if dots and extend_sleeve:
                 self.segments.append(SegmentCircle((0, 0), radius, fill=fill, zorder=4))
+            if extend_sleeve:
+                self.segments.append(Segment([(-radius, 0), (-length + swidth, 0)]))
             self.segments.append(
                 Segment(
                     [
-                        (-radius, 0),
+                        (-length + swidth, 0),
                         (-length, 0),
                         (-length, sleeveheight),
                         (-length + swidth, sleeveheight),
