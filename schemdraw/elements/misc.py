@@ -142,7 +142,7 @@ class AudioJack(Element):
             sleevey += 0.2
             ringy -= 0.2
 
-        sanchorx = 0 if extend_sleeve else -length - swidth
+        sanchorx = 0 if extend_sleeve else -length - swidth if ring else -length
 
         if ring:
             if dots:
