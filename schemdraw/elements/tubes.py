@@ -328,8 +328,8 @@ class DualTriode(VacuumTube):
         )
 
         # Anodes
-        self.anchors["a1"] = (tr_r - anode_len / 2, tr_d)
-        self.anchors["a2"] = (tr_r + anode_len / 2 + dual_tr_gap, tr_d)
+        self.anchors["a1"] = (tr_r, tr_d)
+        self.anchors["a2"] = (tr_r + dual_tr_gap, tr_d)
 
         self.params["drop"] = (tr_d + dual_tr_gap, 0)
 
@@ -622,6 +622,7 @@ def KT66(**kwargs):
     """
 
     return Pentode(pin_nums={"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8}, **kwargs)
+
 
 _6L6GC = KT66
 
