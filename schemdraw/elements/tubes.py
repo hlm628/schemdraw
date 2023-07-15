@@ -328,8 +328,8 @@ class DualTriode(VacuumTube):
         )
 
         # Anodes
-        self.anchors["a1"] = (tr_r - anode_len / 2, tr_d)
-        self.anchors["a2"] = (tr_r + anode_len / 2 + dual_tr_gap, tr_d)
+        self.anchors["a1"] = (tr_r , tr_d)
+        self.anchors["a2"] = (tr_r  + dual_tr_gap, tr_d)
 
         self.params["drop"] = (tr_d + dual_tr_gap, 0)
 
