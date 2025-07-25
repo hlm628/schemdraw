@@ -579,30 +579,28 @@ class Pentode(VacuumTube):
             self.draw_heaters()
 
 
-def KT66(**kwargs):
-    """KT66 Pentode.
-
-    Uses the Pentode class above, but shows correct pin numbers.
-    """
-
-    return Pentode(pin_nums={"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8}, **kwargs)
-
-
-_6L6GC = KT66
-
-
-def EL34(**kwargs):
-    """EL34 Pentode.
-
-    Uses the Pentode class above, but shows correct pin numbers.
-    """
-
-    return Pentode(pin_nums={"g1": 5, "g2": 4, "g3": 1, "a": 3, "k": 8}, **kwargs)
-
-# --- Unified Tube API ---
-
 TUBE_SPECS = {
     "12AX7": {
+        "class": DualTriode,
+        "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
+        "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
+    },
+    "12AT7": {
+        "class": DualTriode,
+        "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
+        "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
+    },
+    "12AU7": {
+        "class": DualTriode,
+        "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
+        "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
+    },
+    "12AY7": {
+        "class": DualTriode,
+        "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
+        "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
+    },
+    "12AY7": {
         "class": DualTriode,
         "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
         "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
@@ -612,6 +610,17 @@ TUBE_SPECS = {
         "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
         "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
     },
+    "ECC82": {
+        "class": DualTriode,
+        "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
+        "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
+    },
+    "ECC81": {
+        "class": DualTriode,
+        "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
+        "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
+    },
+    "ECC80": {
     "EL34": {
         "class": Pentode,
         "pin_nums": {"g1": 5, "g2": 4, "g3": 1, "a": 3, "k": 8},
@@ -622,7 +631,41 @@ TUBE_SPECS = {
         "pin_nums": {"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8},
         "anchors": ["g1", "g2", "g3", "a", "k"],
     },
-    # Add more tube types as needed
+    "KT88": {
+        "class": Pentode,
+        "pin_nums": {"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8},
+        "anchors": ["g1", "g2", "g3", "a", "k"],
+    },
+    "6550": {
+        "class": Pentode,
+        "pin_nums": {"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8},
+        "anchors": ["g1", "g2", "g3", "a", "k"],
+    },
+    "6L6": {
+        "class": Pentode,
+        "pin_nums": {"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8},
+        "anchors": ["g1", "g2", "g3", "a", "k"],
+    },
+    "6L6GC": {
+        "class": Pentode,
+        "pin_nums": {"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8},
+        "anchors": ["g1", "g2", "g3", "a", "k"],
+    },
+    "6V6": {
+        "class": Pentode,
+        "pin_nums": {"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8},
+        "anchors": ["g1", "g2", "g3", "a", "k"],
+    },
+    "6V6GT": {
+        "class": Pentode,
+        "pin_nums": {"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8},
+        "anchors": ["g1", "g2", "g3", "a", "k"],
+    },
+    "EL84": {
+        "class": Pentode,
+        "pin_nums": {"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8},
+        "anchors": ["g1", "g2", "g3", "a", "k"],
+    },
 }
 
 class Tube(Element):
