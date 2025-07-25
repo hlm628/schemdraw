@@ -27,7 +27,7 @@ cathode_tail = 1 / 2 * (cathode_gap - cathode_h)
 
 half_overhang = 12.5
 
-dual_tr_gap = 0.5 * tr_r
+dual_tr_gap =  0.75 * tr_r
 dual_tr_grid_offset = 0.25
 
 pent_gap = dual_tr_gap
@@ -50,11 +50,22 @@ class VacuumTube(Element):
 
     def draw_heaters(self):
         """Draw heater filaments"""
-        x_extent, _ = self.params["drop"]
-
-        self.segments.append(Segment([(x_extent / 2 - 0.2, -0.2), (x_extent / 2, 0.2)]))
-
-        self.segments.append(Segment([(x_extent / 2 + 0.2, -0.2), (x_extent / 2, 0.2)]))
+        # Check tube type by class name
+        class_name = self.__class__.__name__
+        
+        # Calculate center position based on tube type
+        if class_name == "DualTriode":
+            center_x = (tr_d + dual_tr_gap) / 2
+        elif class_name == "Pentode":
+            center_x = tr_d / 2
+        else:
+            # Single Triode or Rectifier
+            x_extent, _ = self.params["drop"]
+            center_x = x_extent / 2
+        
+        # Draw heaters (same logic for all tube types)
+        self.segments.append(Segment([(center_x - 0.2, -0.2), (center_x, 0.2)]))
+        self.segments.append(Segment([(center_x + 0.2, -0.2), (center_x, 0.2)]))
 
     def draw_pin_num(self, location, num):
         self.segments.append(SegmentText(location, str(num)))
@@ -321,6 +332,7 @@ class DualTriode(VacuumTube):
         )
 
         ## Defining the anchor points
+        ## Defining the anchor points
         # Grids
         self.anchors["g1"] = (0, tr_r)  # Grids
         self.anchors["g2"] = (tr_d + dual_tr_gap, tr_r)
@@ -339,7 +351,8 @@ class DualTriode(VacuumTube):
         self.anchors["a1"] = (tr_r, tr_d)
         self.anchors["a2"] = (tr_r + dual_tr_gap, tr_d)
 
-        self.params["drop"] = (tr_d + dual_tr_gap, 0)
+        # Drop point at grid 1 for better positioning
+        self.params["drop"] = (0, tr_r)
 
         # Add pin numbers if provided
         if self.pin_nums is not None:
@@ -378,8 +391,8 @@ class DualTriode(VacuumTube):
                 self.pin_nums["k2"],
             )
 
-            if self.heaters:
-                self.draw_heaters()
+        if self.heaters:
+            self.draw_heaters()
 
 
 class Pentode(VacuumTube):
@@ -538,15 +551,15 @@ class Pentode(VacuumTube):
         )
 
         # Defining the anchor points
-        self.anchors["g1"] = (tr_d, tr_r)  # Grid
+        self.anchors["g1"] = (0, tr_r)  # Grid
         self.anchors["g2"] = (0, tr_r + pent_gap / 2)  # Screen
-        self.anchors["g3"] = (tr_d, tr_r + pent_gap)  # Suppressor
+        self.anchors["g3"] = (0, tr_r + pent_gap)  # Suppressor
         self.anchors["k"] = (
             tr_r - cathode_len / 2,
             tr_r - cathode_gap,
         )  # Cathode
         self.anchors["a"] = (tr_r, tr_d + pent_gap)  # Anode
-        self.params["drop"] = (tr_d, 0)
+        self.params["drop"] = (0, tr_r)
 
         # Add pin numbers if provided
         if self.pin_nums is not None:
@@ -590,7 +603,7 @@ class Rectifier(VacuumTube):
     """
     def __init__(self, *d, pin_nums=None, heaters=True, **kwargs):
         super().__init__(*d, pin_nums=pin_nums, heaters=heaters, **kwargs)
-        # Draw a basic envelope and two diodes
+        # Draw a basic envelope and two diodes (positioned so cathode is at origin)
         # Envelope (circle)
         r = 1.0
         self.segments.append(SegmentArc(center=(r, r), width=2*r, height=2*r, theta1=0, theta2=360))
@@ -603,12 +616,12 @@ class Rectifier(VacuumTube):
         # Heater leads
         self.segments.append(Segment([(0.7, 0.2), (0.7, 0.5)]))
         self.segments.append(Segment([(1.3, 0.2), (1.3, 0.5)]))
-        # Anchors
-        self.anchors["a1"] = (0.5, 1.5)
-        self.anchors["a2"] = (1.5, 0.5)
-        self.anchors["k"] = (1, 1)
-        self.anchors["h1"] = (0.7, 0.2)
-        self.anchors["h2"] = (1.3, 0.2)
+        # Anchors (positioned so cathode is at origin)
+        self.anchors["a1"] = (-0.5, 0.5)
+        self.anchors["a2"] = (0.5, -0.5)
+        self.anchors["k"] = (0, 0)  # Cathode at origin
+        self.anchors["h1"] = (-0.3, -0.8)
+        self.anchors["h2"] = (0.3, -0.8)
         self.params["drop"] = (1, 0)
         # Pin numbers if provided
         if pin_nums:
