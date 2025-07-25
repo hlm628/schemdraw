@@ -579,6 +579,46 @@ class Pentode(VacuumTube):
             self.draw_heaters()
 
 
+class Rectifier(VacuumTube):
+    """Dual-diode tube rectifier.
+
+    Anchors:
+        * a1 (anode 1)
+        * a2 (anode 2)
+        * k (cathode)
+        * h1, h2 (heaters)
+    """
+    def __init__(self, *d, pin_nums=None, heaters=True, **kwargs):
+        super().__init__(*d, pin_nums=pin_nums, heaters=heaters, **kwargs)
+        # Draw a basic envelope and two diodes
+        # Envelope (circle)
+        r = 1.0
+        self.segments.append(SegmentArc(center=(r, r), width=2*r, height=2*r, theta1=0, theta2=360))
+        # Diode 1 (left)
+        self.segments.append(Segment([(0.5, 1.5), (1, 1)]))  # Anode 1 to cathode
+        self.segments.append(Segment([(1, 1), (1.5, 1.5)]))  # Cathode to anode 2
+        # Diode 2 (right)
+        self.segments.append(Segment([(1.5, 0.5), (1, 1)]))
+        self.segments.append(Segment([(1, 1), (0.5, 0.5)]))
+        # Heater leads
+        self.segments.append(Segment([(0.7, 0.2), (0.7, 0.5)]))
+        self.segments.append(Segment([(1.3, 0.2), (1.3, 0.5)]))
+        # Anchors
+        self.anchors["a1"] = (0.5, 1.5)
+        self.anchors["a2"] = (1.5, 0.5)
+        self.anchors["k"] = (1, 1)
+        self.anchors["h1"] = (0.7, 0.2)
+        self.anchors["h2"] = (1.3, 0.2)
+        self.params["drop"] = (1, 0)
+        # Pin numbers if provided
+        if pin_nums:
+            self.draw_pin_num(self.anchors["a1"], pin_nums.get("a1", ""))
+            self.draw_pin_num(self.anchors["a2"], pin_nums.get("a2", ""))
+            self.draw_pin_num(self.anchors["k"], pin_nums.get("k", ""))
+            self.draw_pin_num(self.anchors["h1"], pin_nums.get("h1", ""))
+            self.draw_pin_num(self.anchors["h2"], pin_nums.get("h2", ""))
+
+
 TUBE_SPECS = {
     "12AX7": {
         "class": DualTriode,
@@ -591,11 +631,6 @@ TUBE_SPECS = {
         "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
     },
     "12AU7": {
-        "class": DualTriode,
-        "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
-        "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
-    },
-    "12AY7": {
         "class": DualTriode,
         "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
         "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
@@ -621,6 +656,10 @@ TUBE_SPECS = {
         "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
     },
     "ECC80": {
+        "class": DualTriode,
+        "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
+        "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
+    },
     "EL34": {
         "class": Pentode,
         "pin_nums": {"g1": 5, "g2": 4, "g3": 1, "a": 3, "k": 8},
@@ -665,6 +704,26 @@ TUBE_SPECS = {
         "class": Pentode,
         "pin_nums": {"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8},
         "anchors": ["g1", "g2", "g3", "a", "k"],
+    },
+    "5AR4": {
+        "class": Rectifier,
+        "pin_nums": {"a1": 4, "a2": 6, "k": 8, "h1": 2, "h2": 8},
+        "anchors": ["a1", "a2", "k", "h1", "h2"],
+    },
+    "GZ34": {
+        "class": Rectifier,
+        "pin_nums": {"a1": 4, "a2": 6, "k": 8, "h1": 2, "h2": 8},
+        "anchors": ["a1", "a2", "k", "h1", "h2"],
+    },
+    "5Y3": {
+        "class": Rectifier,
+        "pin_nums": {"a1": 4, "a2": 6, "k": 8, "h1": 2, "h2": 8},
+        "anchors": ["a1", "a2", "k", "h1", "h2"],
+    },
+    "EZ81": {
+        "class": Rectifier,
+        "pin_nums": {"a1": 1, "a2": 7, "k": 3, "h1": 4, "h2": 5},
+        "anchors": ["a1", "a2", "k", "h1", "h2"],
     },
 }
 
