@@ -727,8 +727,8 @@ TUBE_SPECS = {
     },
 }
 
-class Tube(Element):
-    """General vacuum tube element.
+def Tube(tube_type, heaters=False, show_pins=False, **kwargs):
+    """General vacuum tube element factory function.
 
     Args:
         tube_type: e.g. '12AX7', 'EL34', etc.
@@ -736,29 +736,17 @@ class Tube(Element):
         show_pins: Show pin numbers
         **kwargs: Passed to the underlying tube class
 
-    Anchors:
-        For triodes: a, k, g
-        For dual triodes: a1, k1, g1, a2, k2, g2
-        For pentodes: a, k, g1, g2, g3
+    Returns:
+        Instance of the appropriate tube class (DualTriode, Pentode, etc.)
 
     Example:
         V1 = Tube('12AX7', heaters=True)
         V2 = Tube('EL34', heaters=True)
         # Access anchors: V1.a1, V1.k2, V2.g2, etc.
     """
-    def __init__(self, tube_type, heaters=False, show_pins=False, **kwargs):
-        spec = TUBE_SPECS.get(tube_type.upper())
-        if not spec:
-            raise ValueError(f"Unknown tube type: {tube_type}")
-        tube_cls = spec["class"]
-        pin_nums = spec["pin_nums"] if show_pins else None
-        self._tube = tube_cls(heaters=heaters, pin_nums=pin_nums, **kwargs)
-        self.anchors = self._tube.anchors
-        self.params = getattr(self._tube, 'params', {})
-        self.segments = getattr(self._tube, 'segments', [])
-        # Expose anchor points as attributes for convenience
-        for anchor in spec["anchors"]:
-            setattr(self, anchor, self._tube.anchors[anchor])
-    def __getattr__(self, name):
-        # Fallback to underlying tube for any other attributes
-        return getattr(self._tube, name)
+    spec = TUBE_SPECS.get(tube_type.upper())
+    if not spec:
+        raise ValueError(f"Unknown tube type: {tube_type}")
+    tube_cls = spec["class"]
+    pin_nums = spec["pin_nums"] if show_pins else None
+    return tube_cls(heaters=heaters, pin_nums=pin_nums, **kwargs)
