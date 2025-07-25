@@ -75,7 +75,7 @@ from .transistors import (NFet, PFet, AnalogNFet, AnalogPFet, AnalogBiasedFet,
                           JFet, JFetN, JFetP, Bjt, BjtNpn, BjtPnp, BjtPnp2c, Bjt2, BjtNpn2, BjtPnp2,
                           BjtPnp2c2, NFet2, PFet2, JFet2, JFetN2, JFetP2, NMos, PMos, NMos2, PMos2, Hemt,
                           IgbtN, IgbtP, NpnSchottky, PnpSchottky, NpnPhoto, PnpPhoto)
-from .tubes import (Triode, DualTriode, Half12AX7, _12AX7, HalfECC83, ECC83, Pentode, KT66, EL34)
+from .tubes import (Triode, DualTriode, Pentode, Rectifier, Tube)
 from .misc import Speaker, Mic, Motor, AudioJack
 from .xform import Transformer
 from .cables import Coax, Triax
@@ -182,7 +182,7 @@ __all__ = [
     "AnalogBiasedFet", "JFet", "JFetN", "JFetP",
     "Bjt", "BjtNpn", "BjtPnp", "BjtPnp2c", "Bjt2", "BjtNpn2", "BjtPnp2", "BjtPnp2c2", "NFet2", "PFet2", "JFet2",
     "JFetN2", "JFetP2", "NMos", "PMos", "NMos2", "PMos2", "Hemt", "IgbtN", "IgbtP", "NpnSchottky", "PnpSchottky", "NpnPhoto", "PnpPhoto",
-    "Triode", "DualTriode", "Half12AX7", "_12AX7", "HalfECC83", "ECC83", "Pentode", "KT66", "EL34"
+    "Triode", "DualTriode", "Pentode", "Rectifier", "Tube"
 ]
 
 
