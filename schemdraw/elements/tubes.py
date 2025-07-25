@@ -1,4 +1,12 @@
-""" Vacuum tube """
+""" Vacuum tube elements for schematic drawing.
+
+Recommended usage:
+    V1 = Tube('12AX7', heaters=True)
+    V2 = Tube('EL34', heaters=True)
+    # Access anchors: V1.a1, V1.k2, V2.g2, etc.
+
+Available tube types: 12AX7, ECC83, EL34, KT66 (see TUBE_SPECS for more)
+"""
 
 import math
 from .elements import Element, gap
@@ -374,50 +382,6 @@ class DualTriode(VacuumTube):
                 self.draw_heaters()
 
 
-def Half12AX7(half="left", **kwargs):
-    """Half of a 12AX7 Triode.
-
-    Uses the Triode class above, but shows correct pin numbers. Can specify left or right.
-
-    Args:
-        half: "left" or "right" half of the tube
-
-    """
-
-    if half == "left":
-        pin_nums = {"g": 2, "k": 3, "a": 1}
-
-    elif half == "right":
-        pin_nums = {"g": 7, "k": 8, "a": 6}
-
-    return Triode(half=half, pin_nums=pin_nums, **kwargs)
-
-
-def _12AX7(**kwargs):
-    """Full 12AX7 Triode.
-
-    Uses the DualTriode class above, but shows correct pin numbers.
-    """
-
-    return DualTriode(
-        pin_nums={"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6}, **kwargs
-    )
-
-
-ECC83 = _12AX7
-HalfECC83 = Half12AX7
-_12AT7 = _12AX7
-_12AU7 = _12AX7
-_12AY7 = _12AX7
-_12AX7A = _12AX7
-_12AX7WA = _12AX7
-ECC81 = _12AX7
-ECC82 = _12AX7
-_7025 = _12AX7
-CV4004 = _12AX7
-ECC803 = _12AX7
-
-
 class Pentode(VacuumTube):
     """Pentode Vacuum Tube.
 
@@ -634,3 +598,65 @@ def EL34(**kwargs):
     """
 
     return Pentode(pin_nums={"g1": 5, "g2": 4, "g3": 1, "a": 3, "k": 8}, **kwargs)
+
+# --- Unified Tube API ---
+
+TUBE_SPECS = {
+    "12AX7": {
+        "class": DualTriode,
+        "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
+        "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
+    },
+    "ECC83": {
+        "class": DualTriode,
+        "pin_nums": {"g1": 2, "k1": 3, "a1": 1, "g2": 7, "k2": 8, "a2": 6},
+        "anchors": ["g1", "k1", "a1", "g2", "k2", "a2"],
+    },
+    "EL34": {
+        "class": Pentode,
+        "pin_nums": {"g1": 5, "g2": 4, "g3": 1, "a": 3, "k": 8},
+        "anchors": ["g1", "g2", "g3", "a", "k"],
+    },
+    "KT66": {
+        "class": Pentode,
+        "pin_nums": {"g1": 5, "g2": 4, "g3": "", "a": 3, "k": 8},
+        "anchors": ["g1", "g2", "g3", "a", "k"],
+    },
+    # Add more tube types as needed
+}
+
+class Tube(Element):
+    """General vacuum tube element.
+
+    Args:
+        tube_type: e.g. '12AX7', 'EL34', etc.
+        heaters: Draw heater filaments
+        show_pins: Show pin numbers
+        **kwargs: Passed to the underlying tube class
+
+    Anchors:
+        For triodes: a, k, g
+        For dual triodes: a1, k1, g1, a2, k2, g2
+        For pentodes: a, k, g1, g2, g3
+
+    Example:
+        V1 = Tube('12AX7', heaters=True)
+        V2 = Tube('EL34', heaters=True)
+        # Access anchors: V1.a1, V1.k2, V2.g2, etc.
+    """
+    def __init__(self, tube_type, heaters=False, show_pins=False, **kwargs):
+        spec = TUBE_SPECS.get(tube_type.upper())
+        if not spec:
+            raise ValueError(f"Unknown tube type: {tube_type}")
+        tube_cls = spec["class"]
+        pin_nums = spec["pin_nums"] if show_pins else None
+        self._tube = tube_cls(heaters=heaters, pin_nums=pin_nums, **kwargs)
+        self.anchors = self._tube.anchors
+        self.params = getattr(self._tube, 'params', {})
+        self.segments = getattr(self._tube, 'segments', [])
+        # Expose anchor points as attributes for convenience
+        for anchor in spec["anchors"]:
+            setattr(self, anchor, self._tube.anchors[anchor])
+    def __getattr__(self, name):
+        # Fallback to underlying tube for any other attributes
+        return getattr(self._tube, name)
